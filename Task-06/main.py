@@ -6,7 +6,8 @@ import os
 from lrclib import LrcLibAPI as lrc 
 api = lrc(user_agent="my-app/0.0.1") 
 
-
+'''
+'''
 load_dotenv()
 
 token=os.getenv('DISCORD_TOKEN')
