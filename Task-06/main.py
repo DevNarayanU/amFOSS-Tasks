@@ -1,4 +1,5 @@
 import discord
+import json
 from discord.ext import commands
 import logging
 from dotenv import load_dotenv
@@ -104,7 +105,82 @@ async def track(x,*,l:str.split):
         for result in results[:5] :
             await x.send(f"{i} ) {result.artist_name} - {result.track_name} ({result.album_name})")
             i+=1
+@bot.command()
+async def insert(x, *, l: str):
+    try:
+        song, artist = map(str.strip, l.split('-', 1))  # safe split
+    except ValueError:
+        await x.send("❌ Please use format : `/insert <song> - <artist>`")
+        return
 
+    try:
+        with open("users.json", "r") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = {}
+
+    user_key = str(x.author.name)  # ⚠️ Not unique, consider ctx.author.id for safety
+
+    if user_key not in data:
+        data[user_key] = []
+    if f"{song} - {artist}" not in data[user_key]:
+        data[user_key].append(f"{song} - {artist}")
+
+    with open("users.json", "w") as f:
+        json.dump(data, f, indent=4)
+
+    await x.send(f"Added **{song} - {artist}** for {x.author.mention}")
+
+@bot.command()
+async def delete(x, *, l: str):
+    try:
+        song, artist = map(str.strip, l.split('-', 1)) 
+    except ValueError:
+        await x.send("Please use format : `/delete <song> - <artist>`")
+        return
+
+    try:
+        with open("users.json", "r") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = {}
+
+    user_key = str(x.author.name)  
+    if user_key not in data or not data[user_key]:
+        await x.send(" You don’t have any songs in playlist")
+        return
+    try:
+        data[user_key].remove(f"{song} - {artist}")
+    except ValueError:
+        await x.send(f"Could not find **{song} - {artist}** in your list.")
+        return
+    
+
+    with open("users.json", "w") as f:
+        json.dump(data, f, indent=4)
+
+    await x.send(f"deleted **{song} - {artist}** for {x.author.mention} from playlist")
+
+@bot.command()
+async def play(x):
+    
+    user_key = str(x.author.name) 
+
+    try:
+        with open("users.json", "r") as f:
+            data = json.load(f)
+        for i in range(len(data[user_key])):
+            await x.send(f"{i+1} ::     {data[user_key][i]} ")
+    except (FileNotFoundError, json.JSONDecodeError):        
+        await x.send(f" Could not find any song in your list.")
+        return
+    
+
+     
+    if user_key not in data or not data[user_key]:
+        await x.send(" You don’t have any songs in playlist")
+        return
+    
 @bot.command()
 @commands.has_role(srole)   
 async def lyrics(x,*,l:str):
