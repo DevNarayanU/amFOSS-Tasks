@@ -119,7 +119,7 @@ async def insert(x, *, l: str):
     except (FileNotFoundError, json.JSONDecodeError):
         data = {}
 
-    user_key = str(x.author.name)  # ⚠️ Not unique, consider ctx.author.id for safety
+    user_key = str(x.author.name)  
 
     if user_key not in data:
         data[user_key] = []
@@ -162,7 +162,7 @@ async def delete(x, *, l: str):
     await x.send(f"deleted **{song} - {artist}** for {x.author.mention} from playlist")
 
 @bot.command()
-async def play(x):
+async def view(x):
     
     user_key = str(x.author.name) 
 
@@ -170,7 +170,7 @@ async def play(x):
         with open("users.json", "r") as f:
             data = json.load(f)
         for i in range(len(data[user_key])):
-            await x.send(f"{i+1} ::     {data[user_key][i]} ")
+            await x.send(f"{i+1} :: {data[user_key][i]} ")
     except (FileNotFoundError, json.JSONDecodeError):        
         await x.send(f" Could not find any song in your list.")
         return
